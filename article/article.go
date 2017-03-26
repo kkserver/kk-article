@@ -9,7 +9,9 @@ import (
 
 type Article struct {
 	Id      int64  `json:"id"`
+	Uid     int64  `json:"uid"`
 	Name    string `json:"name"`
+	Alias   string `json:"alias"`
 	Author  string `json:"author"`
 	Origin  string `json:"origin"`
 	Title   string `json:"title"`

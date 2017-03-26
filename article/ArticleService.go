@@ -52,6 +52,8 @@ func (S *ArticleService) HandleArticleCreateTask(a IArticleApp, task *ArticleCre
 
 	v := Article{}
 
+	v.Uid = task.Uid
+	v.Alias = task.Alias
 	v.Title = task.Title
 	v.Image = task.Image
 	v.Images = task.Images
@@ -187,6 +189,11 @@ func (S *ArticleService) HandleArticleSetTask(a IArticleApp, task *ArticleSetTas
 	if task.Summary != nil {
 		v.Summary = dynamic.StringValue(task.Summary, v.Summary)
 		keys["summary"] = true
+	}
+
+	if task.Uid != nil {
+		v.Uid = dynamic.IntValue(task.Uid, v.Uid)
+		keys["uid"] = true
 	}
 
 	v.Mtime = time.Now().Unix()
@@ -359,6 +366,16 @@ func (S *ArticleService) HandleArticleQueryTask(a IArticleApp, task *ArticleQuer
 	if task.Id != 0 {
 		sql.WriteString(" AND id=?")
 		args = append(args, task.Id)
+	}
+
+	if task.Uid != 0 {
+		sql.WriteString(" AND uid=?")
+		args = append(args, task.Uid)
+	}
+
+	if task.Alias != "" {
+		sql.WriteString(" AND alias=?")
+		args = append(args, task.Alias)
 	}
 
 	if task.Name != "" {

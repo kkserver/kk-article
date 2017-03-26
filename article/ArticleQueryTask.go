@@ -21,6 +21,8 @@ type ArticleQueryTask struct {
 	app.Task
 	Id        int64  `json:"id"`
 	Name      string `json:"name"`
+	Alias     string `json:"alias"`
+	Uid       int64  `json:"uid"`
 	Keyword   string `json:"q"`
 	OrderBy   string `json:"orderBy"` // desc, asc
 	PageIndex int    `json:"p"`

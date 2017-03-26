@@ -11,9 +11,9 @@ type ArticleSetTaskResult struct {
 
 type ArticleSetTask struct {
 	app.Task
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
-
+	Id      int64       `json:"id"`
+	Name    string      `json:"name"`
+	Uid     interface{} `json:"uid"`
 	Author  interface{} `json:"author"`
 	Origin  interface{} `json:"origin"`
 	Title   interface{} `json:"title"`
