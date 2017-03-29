@@ -433,7 +433,7 @@ func (S *ArticleService) HandleArticleQueryTask(a IArticleApp, task *ArticleQuer
 	var v = Article{}
 	var scanner = kk.NewDBScaner(&v)
 
-	rows, err := db.Query(fmt.Sprintf("SELECT id,name,author,origin,title,image,images,type,intime,mtime,ctime FROM %s%s %s", a.GetPrefix(), a.GetArticleTable().Name, sql.String()), args...)
+	rows, err := db.Query(fmt.Sprintf("SELECT id,alias,uid,name,author,origin,title,image,images,type,intime,mtime,ctime FROM %s%s %s", a.GetPrefix(), a.GetArticleTable().Name, sql.String()), args...)
 
 	if err != nil {
 		task.Result.Errno = ERROR_ARTICLE
