@@ -12,11 +12,12 @@ import (
 type ArticleService struct {
 	app.Service
 
-	Get    *ArticleTask
-	Set    *ArticleSetTask
-	Remove *ArticleRemoveTask
-	Create *ArticleCreateTask
-	Query  *ArticleQueryTask
+	Get      *ArticleTask
+	Set      *ArticleSetTask
+	Remove   *ArticleRemoveTask
+	Create   *ArticleCreateTask
+	Query    *ArticleQueryTask
+	Exchange *ArticleExchangeTask
 }
 
 func (S *ArticleService) Handle(a app.IApp, task app.ITask) error {
@@ -66,6 +67,7 @@ func (S *ArticleService) HandleArticleCreateTask(a IArticleApp, task *ArticleCre
 	v.Summary = task.Summary
 	v.Ctime = time.Now().Unix()
 	v.Mtime = v.Ctime
+	v.Oid = NewOid()
 
 	_, err = kk.DBInsert(db, a.GetArticleTable(), a.GetPrefix(), &v)
 
@@ -391,6 +393,8 @@ func (S *ArticleService) HandleArticleQueryTask(a IArticleApp, task *ArticleQuer
 
 	if task.OrderBy == "asc" {
 		sql.WriteString(" ORDER BY id ASC")
+	} else if task.OrderBy == "oid" {
+		sql.WriteString(" ORDER BY oid DESC,id DESC")
 	} else {
 		sql.WriteString(" ORDER BY id DESC")
 	}
@@ -453,6 +457,65 @@ func (S *ArticleService) HandleArticleQueryTask(a IArticleApp, task *ArticleQuer
 	}
 
 	task.Result.Articles = articles
+
+	return nil
+}
+
+func (S *ArticleService) HandleArticleExchangeTask(a IArticleApp, task *ArticleExchangeTask) error {
+
+	var db, err = a.GetDB()
+
+	if err != nil {
+		task.Result.Errno = ERROR_ARTICLE
+		task.Result.Errmsg = err.Error()
+		return nil
+	}
+
+	v := Article{}
+	vs := []Article{}
+
+	rows, err := db.Query(fmt.Sprintf("SELECT id,oid FROM %s%s WHERE id IN (?,?)", a.GetPrefix(), a.GetArticleTable().Name), task.FromId, task.ToId)
+
+	if err != nil {
+		task.Result.Errno = ERROR_ARTICLE
+		task.Result.Errmsg = err.Error()
+		return nil
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		err = rows.Scan(&v.Id, &v.Oid)
+
+		if err != nil {
+			task.Result.Errno = ERROR_ARTICLE
+			task.Result.Errmsg = err.Error()
+			return nil
+		}
+
+		vs = append(vs, v)
+	}
+
+	if len(vs) > 1 {
+
+		_, err = db.Exec(fmt.Sprintf("UPDATE %s%s SET oid=? WHERE id=?", a.GetPrefix(), a.GetArticleTable().Name), vs[0].Oid, vs[1].Id)
+
+		if err != nil {
+			task.Result.Errno = ERROR_ARTICLE
+			task.Result.Errmsg = err.Error()
+			return nil
+		}
+
+		_, err = db.Exec(fmt.Sprintf("UPDATE %s%s SET oid=? WHERE id=?", a.GetPrefix(), a.GetArticleTable().Name), vs[1].Oid, vs[0].Id)
+
+		if err != nil {
+			task.Result.Errno = ERROR_ARTICLE
+			task.Result.Errmsg = err.Error()
+			return nil
+		}
+
+	}
 
 	return nil
 }

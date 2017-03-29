@@ -5,6 +5,7 @@ import (
 	"github.com/kkserver/kk-lib/kk"
 	"github.com/kkserver/kk-lib/kk/app"
 	"github.com/kkserver/kk-lib/kk/app/remote"
+	"time"
 )
 
 type Article struct {
@@ -24,6 +25,17 @@ type Article struct {
 	InTime  int64  `json:"intime"`
 	Mtime   int64  `json:"mtime"`
 	Ctime   int64  `json:"ctime"`
+	Oid     int64  `json:"oid"`
+}
+
+const twepoch = int64(1424016000000)
+
+func milliseconds() int64 {
+	return time.Now().UnixNano() / 1e6
+}
+
+func NewOid() int64 {
+	return milliseconds() - twepoch
 }
 
 type IArticleApp interface {

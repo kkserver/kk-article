@@ -24,7 +24,7 @@ type ArticleQueryTask struct {
 	Alias     string `json:"alias"`
 	Uid       int64  `json:"uid"`
 	Keyword   string `json:"q"`
-	OrderBy   string `json:"orderBy"` // desc, asc
+	OrderBy   string `json:"orderBy"` // desc, asc, oid
 	PageIndex int    `json:"p"`
 	PageSize  int    `json:"size"`
 	Counter   bool   `json:"counter"`
